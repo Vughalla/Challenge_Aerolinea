@@ -3,11 +3,17 @@ import pandas as pd
 
 
 def q2_memory(file_path: str) -> List[Tuple[str, int]]:
-    # Lee los datos JSON en un DataFrame de Pandas
-    json_df = pd.read_json(file_path, lines=True, encoding='utf-8')
+    df_concat = pd.DataFrame(columns=['content'])
 
-    # Se filtran del dataframe todas las columnas excepto la deseada para obtener los datos.
-    json_df = json_df['content'].to_frame() 
+    for json_df in pd.read_json(file_path, lines=True, encoding='utf-8', chunksize=100):
+        # Se filtran del dataframe todas las columnas excepto la deseada para obtener los datos.
+        json_df = json_df['content'].to_frame() 
+        df_concat = pd.concat([df_concat, json_df])
+
+    json_df = df_concat
+
+    # Se elimina el df para liberar ese espacio en memoria.
+    del df_concat
 
     # Esta expresion regular hace match con todos los codigos Unicode existentes para emojis.
     emoji_pattern = r'[\U0001F000-\U0001FFFF]'
